@@ -184,7 +184,7 @@ def cli_send_articles():
                 msg['From'] = app.config.get('FROM_EMAIL')
                 msg['To'] = email
                 msg['Subject'] = 'Test'
-                print(msg.as_string())
+                s.sendmail(app.config.get('FROM_EMAIL'), email, msg.as_string())
 
 
 if __name__ == "__main__":
