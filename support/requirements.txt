@@ -11,3 +11,4 @@ Flask-Migrate
 mysqlclient
 mwoauth==0.3.2
 flask-mwoauth
+pywikibot
