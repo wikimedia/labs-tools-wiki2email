@@ -25,6 +25,12 @@ from flask_mwoauth import MWOAuth
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import subprocess
+import mwparserfromhell
+import datetime
+import pywikibot
+from wiki2plain import Wiki2Plain
+import smtplib
+from email.mime.text import MIMEText
 
 app = Flask(__name__, static_folder='../static')
 
@@ -75,6 +81,10 @@ def get_user():
     return User.query.filter_by(
         username=mwoauth.get_current_user()
     ).first()
+
+def get_user_email(user):
+    identity = mwoauth.get_user_identity_from_token(user.token_key, user.token_secret)
+    return identity['email']
 
 @app.before_request
 def db_init_user():
@@ -132,6 +142,50 @@ def index():
         return render_template('index.html')
     else:
         return render_template('login.html')
+
+def get_cswiki_article_of_week():
+    yearweek = datetime.date.today().isocalendar()[:2]
+    title = 'Wikipedie:Článek týdne/%04d/%02d' % yearweek
+    site = pywikibot.Site()
+    page = pywikibot.Page(site, title)
+    code = mwparserfromhell.parse(page.text)
+    for template in code.filter_templates():
+        if template.name.strip().lower() == u'čt':
+            for param in template.params:
+                if param.name.strip() == u'název':
+                    article = param.value.strip()
+                    break
+            break
+    page = pywikibot.Page(site, article)
+    text = str(Wiki2Plain(page.text)).split('\n\n')[0]
+    emailtext = """Článek týdne: %s
+
+%s
+
+Plný text: %s
+
+--
+Váš zasílač článků týdne
+Kontakt: martin.urbanec@wikimedia.cz
+""" % (article, text, "https://cs.wikipedia.org/wiki/" + article.replace(' ', '_'))
+    return emailtext
+
+@app.cli.command('send-articles')
+def cli_send_articles():
+    #s = smtplib.SMTP('mail.tools.wmflabs.org')
+    emails = {
+        'cswiki': get_cswiki_article_of_week()
+    }
+    for user in User.query.filter_by(is_active=True):
+        email = get_user_email(user)
+        for wiki in user.wikis:
+            if wiki.dbname in emails:
+                msg = MIMEText(emails[wiki.dbname])
+                msg['From'] = app.config.get('FROM_EMAIL')
+                msg['To'] = email
+                msg['Subject'] = 'Test'
+                print(msg.as_string())
+
 
 if __name__ == "__main__":
     app.run()
