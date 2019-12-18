@@ -172,7 +172,7 @@ Kontakt: martin.urbanec@wikimedia.cz
 
 @app.cli.command('send-articles')
 def cli_send_articles():
-    #s = smtplib.SMTP('mail.tools.wmflabs.org')
+    s = smtplib.SMTP('mail.tools.wmflabs.org')
     emails = {
         'cswiki': get_cswiki_article_of_week()
     }
