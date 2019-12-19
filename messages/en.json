@@ -1,0 +1,7 @@
+{
+    "introduction-please-login": "Please, <a href=\"login\">log in</a>",
+    "introduction": "Wiki2email is a tool that allows you to get article of the week by email.",
+    "report-bug": "Report a bug",
+    "login": "Log in",
+    "logout": "Log out"
+}
