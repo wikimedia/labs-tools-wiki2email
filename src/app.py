@@ -17,7 +17,7 @@
 import os
 import yaml
 from flask import session, redirect, request, jsonify, render_template, url_for, \
-    make_response
+    make_response, flash
 from flask import Flask
 import requests
 from flask_jsonlocale import Locales
@@ -139,9 +139,35 @@ def get_revision_link():
 @app.route('/')
 def index():
     if logged():
-        return render_template('index.html')
+        wikis = {
+            'cswiki': False,
+        }
+        for wiki in wikis:
+            wikis[wiki] = bool(Wiki.query.filter_by(user=get_user(), dbname=wiki).first())
+        return render_template('index.html', wikis=wikis)
     else:
         return render_template('login.html')
+
+@app.route('/change/<wiki>/<value>', methods=['POST'])
+def change_wiki(wiki, value):
+    if value == "True":
+        value = True
+    else:
+        value = False
+    wiki_obj = Wiki.query.filter_by(user=get_user(), dbname=wiki).first()
+    if value:
+        if not wiki_obj:
+            wiki_obj = Wiki(user=get_user(), dbname=wiki)
+            db.session.add(wiki_obj)
+            db.session.commit()
+            flash('You enabled getting weekly article emails for a wiki.')
+            return redirect(url_for('index'))
+    else:
+        if wiki_obj:
+            db.session.delete(wiki_obj)
+            db.session.commit()
+            flash('You disabled getting weekly article emails for a wiki.')
+            return redirect(url_for('index'))
 
 def get_cswiki_article_of_week():
     yearweek = datetime.date.today().isocalendar()[:2]

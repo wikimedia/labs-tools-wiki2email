@@ -3,5 +3,34 @@
 {% block content %}
 <div class="container">
     <h1>Wiki2email</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Wiki</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for wiki in wikis %}
+            <tr>
+                <td>{{wiki}}</td>
+                <td>
+                    {% if wikis[wiki] %}
+                    Enabled
+                    <form action="{{url_for('change_wiki', wiki=wiki, value=False)}}" method="post">
+                        <button type="submit" class="btn btn-primary btn-danger">Disable</button>
+                    </form>
+                    {% else %}
+                    Disabled
+                    <form action="{{url_for('change_wiki', wiki=wiki, value=True)}}" method="post">
+                        <button type="submit" class="btn btn-primary btn-success">Enable</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}
