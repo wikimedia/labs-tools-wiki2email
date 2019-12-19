@@ -1,0 +1,8 @@
+SQLALCHEMY_DATABASE_URI: mysql://root:pwd@localhost/wiki_email
+DEBUG: True
+MESSAGES_DIR: ../messages
+CONSUMER_KEY: 59e2f2df5873b145841200922bc74311
+CONSUMER_SECRET: 9c49b8d92db05adc7fa5eb6a47a03fa5a41ea794
+OAUTH_MWURI: https://meta.wikimedia.org/w
+SECRET_KEY: secret
+FROM_EMAIL: noreply@example.com
